@@ -12,15 +12,14 @@ import { fileURLToPath } from "node:url";
 const fonts = generateAstroFontsConfig(fontsJson);
 const generatedDir = fileURLToPath(new URL("./.generated", import.meta.url));
 
-// ⚠️ إعدادات ثابتة بدل config (مهم لـ Cloudflare)
-const siteUrl = "https://fintosoft.com";
+// إعدادات ثابتة (Production safe)
 const sitemapEnabled = true;
 const showDefaultLangInUrl = true;
 const defaultLanguage = "en";
 
 // https://astro.build/config
 export default defineConfig({
-  site: siteUrl,
+  site: "https://fintosoft.com",
   trailingSlash: "always",
 
   image: {
