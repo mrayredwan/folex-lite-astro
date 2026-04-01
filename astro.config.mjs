@@ -4,7 +4,6 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import remarkParseContent from "./src/lib/utils/remarkParseContent.ts";
-import config from "./.generated/config.generated.json" assert { type: "json" };
 import fontsJson from "./src/config/fonts.json";
 import { generateAstroFontsConfig } from "./src/lib/utils/AstroFont.ts";
 import { enabledLanguages } from "./src/lib/utils/i18nUtils.ts";
@@ -12,21 +11,24 @@ import { fileURLToPath } from "node:url";
 
 const fonts = generateAstroFontsConfig(fontsJson);
 const generatedDir = fileURLToPath(new URL("./.generated", import.meta.url));
-let {
-  seo: { sitemap: sitemapConfig },
-  settings: {
-    multilingual: { showDefaultLangInUrl, defaultLanguage },
-  },
-} = config;
+
+// ⚠️ إعدادات ثابتة بدل config (مهم لـ Cloudflare)
+const siteUrl = "https://fintosoft.com";
+const sitemapEnabled = true;
+const showDefaultLangInUrl = true;
+const defaultLanguage = "en";
 
 // https://astro.build/config
 export default defineConfig({
-  site: config.site.baseUrl ? config.site.baseUrl : "http://examplesite.com",
-  trailingSlash: config.site.trailingSlash ? "always" : "never",
+  site: siteUrl,
+  trailingSlash: "always",
+
   image: {
     layout: "constrained",
   },
+
   fonts,
+
   i18n: {
     locales: enabledLanguages,
     defaultLocale: defaultLanguage,
@@ -34,7 +36,12 @@ export default defineConfig({
       prefixDefaultLocale: showDefaultLangInUrl,
     },
   },
-  integrations: [sitemapConfig.enable ? sitemap() : null, mdx()],
+
+  integrations: [
+    mdx(),
+    ...(sitemapEnabled ? [sitemap()] : [])
+  ],
+
   markdown: {
     rehypePlugins: [
       [
@@ -47,13 +54,14 @@ export default defineConfig({
     ],
     remarkPlugins: [remarkParseContent],
 
-    // Code Highlighter https://github.com/shikijs/shiki
     shikiConfig: {
-      theme: "light-plus", // https://shiki.style/themes
+      theme: "light-plus",
       wrap: false,
     },
+
     extendDefaultPlugins: true,
   },
+
   vite: {
     plugins: [tailwindcss()],
     resolve: {
